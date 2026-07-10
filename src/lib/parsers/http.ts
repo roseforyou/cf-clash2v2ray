@@ -15,9 +15,8 @@ export function parseHttp(proxy: any, scheme: 'http' | 'socks' = 'http'): string
 
   let authPart = '';
   if (username || password) {
-    const credentials = `${username}:${password}`;
-    const base64Credentials = btoa(unescape(encodeURIComponent(credentials)));
-    authPart = `${base64Credentials}@`;
+    // HTTP & SOCKS URIs use plain-text (percent-encoded) credentials, not base64.
+    authPart = `${encodeURIComponent(username)}:${encodeURIComponent(password)}@`;
   }
 
   let finalScheme: string = scheme;
