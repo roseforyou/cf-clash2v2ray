@@ -10,6 +10,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [globalError, setGlobalError] = useState('');
+  const [clashUrl, setClashUrl] = useState('');
 
   const handleConvertUrl = async (url: string) => {
     setIsLoading(true);
@@ -57,6 +58,7 @@ export default function App() {
           try {
             const convResult = convertClashToV2Ray(text);
             setResult(convResult);
+            setClashUrl(url);
             resolve();
           } catch (err: any) {
             reject(err);
@@ -81,6 +83,7 @@ export default function App() {
       try {
         const convResult = convertClashToV2Ray(text);
         setResult(convResult);
+        setClashUrl('');
       } catch (err: any) {
         setGlobalError(err.message || 'YAML 解析或转换失败，请检查文本格式。');
       } finally {
@@ -138,7 +141,7 @@ export default function App() {
         )}
 
         {/* Result Card */}
-        {result && <ResultCard result={result} />}
+        {result && <ResultCard result={result} clashUrl={clashUrl} />}
       </main>
 
       {/* Footer */}

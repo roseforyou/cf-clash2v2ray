@@ -5,12 +5,19 @@ import QRCodeModal from './QRCodeModal';
 
 interface ResultCardProps {
   result: ConversionResult;
+  clashUrl?: string;
 }
 
-export default function ResultCard({ result }: ResultCardProps) {
+export default function ResultCard({ result, clashUrl }: ResultCardProps) {
   const [copied, setCopied] = useState(false);
   const [showNodeList, setShowNodeList] = useState(false);
   const [qrNode, setQrNode] = useState<{ name: string; uri: string } | null>(null);
+
+  // Retrieve token and construct dynamic subscription URL
+  const token = localStorage.getItem('FETCH_PROXY_TOKEN') || '';
+  const subUrl = clashUrl
+    ? `${window.location.origin}/api/sub?token=${encodeURIComponent(token)}&url=${encodeURIComponent(clashUrl)}`
+    : result.subscriptionText; // Fallback to base64 text for paste mode
 
   const handleCopy = async () => {
     const text = result.subscriptionText;
@@ -109,7 +116,7 @@ export default function ResultCard({ result }: ResultCardProps) {
               下载文件
             </button>
             <button
-              onClick={() => handleShowQR('全节点订阅二维码', result.subscriptionText)}
+              onClick={() => handleShowQR(clashUrl ? '一键订阅二维码 (扫码导入所有节点)' : '全节点订阅二维码', subUrl)}
               className="px-3 py-1.5 rounded-xl border border-claude-border bg-claude-card text-claude-text-muted hover:text-claude-text-dark hover:bg-claude-bg text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm"
             >
               <QrCode className="w-3.5 h-3.5" />
