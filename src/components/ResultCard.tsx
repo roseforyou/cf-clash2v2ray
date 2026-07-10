@@ -108,6 +108,13 @@ export default function ResultCard({ result }: ResultCardProps) {
               <Download className="w-3.5 h-3.5" />
               下载文件
             </button>
+            <button
+              onClick={() => handleShowQR('全节点订阅二维码', result.subscriptionText)}
+              className="px-3 py-1.5 rounded-xl border border-claude-border bg-claude-card text-claude-text-muted hover:text-claude-text-dark hover:bg-claude-bg text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm"
+            >
+              <QrCode className="w-3.5 h-3.5" />
+              订阅二维码
+            </button>
           </div>
         </div>
         
