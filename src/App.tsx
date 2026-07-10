@@ -90,20 +90,20 @@ export default function App() {
   };
 
   return (
-    <div className="w-full max-w-[720px] mx-auto px-4 py-8 sm:py-16 flex flex-col min-h-screen">
+    <div className="w-full max-w-[720px] mx-auto px-4 py-6 sm:py-10 flex flex-col min-h-screen">
       {/* Settings Modal */}
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
 
       {/* Header section */}
-      <header className="text-center mb-10 space-y-3">
-        <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-claude-terracotta/10 text-claude-terracotta border border-claude-terracotta/20 shadow-sm animate-pulse-slow">
-          <Compass className="w-8 h-8" />
+      <header className="flex flex-col items-center text-center mb-6 space-y-1.5">
+        <div className="flex items-center justify-center gap-2">
+          <Compass className="w-6 h-6 text-claude-terracotta shrink-0 animate-spin-slow" />
+          <h1 className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-claude-text-dark">
+            Clash → V2Ray 订阅转换
+          </h1>
         </div>
-        <h1 className="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-claude-text-dark">
-          Clash → V2Ray 订阅转换
-        </h1>
-        <p className="text-sm sm:text-base text-claude-text-muted max-w-lg mx-auto leading-relaxed">
-          极简、隐私安全、纯前端解析。支持 SS、SSR、VMess、VLESS 和 Trojan 协议。
+        <p className="text-xs text-claude-text-muted max-w-md mx-auto leading-relaxed">
+          极简、隐私安全、纯前端解析。支持 SS、SSR、VMess、VLESS、Trojan、HTTP/SOCKS 协议。
         </p>
       </header>
 
