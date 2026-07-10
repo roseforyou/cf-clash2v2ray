@@ -52,7 +52,7 @@
 在配置页面中，按照以下项进行填写：
 - **Project name (项目名称)**: 默认即可（通常为 `cf-clash2v2ray`）
 - **Production branch (生产分支)**: `main`
-- **Framework preset (框架预设)**: 选择 **`Vite`**
+- **Framework preset (框架预设)**: 选择 **`None (无)`** (通常在下拉菜单最顶部)
 - **Build command (构建命令)**: `pnpm run build` 或 `npm run build`
 - **Build output directory (输出目录)**: `dist`
 填写完成后，点击底部的 **Save and Deploy (保存并部署)**。此时 Cloudflare 会开始首次编译，您可以先进行下面的数据库配置。
@@ -83,10 +83,16 @@
 3. 点击 **Save (保存)**。
 
 ### 第五步：重新部署以激活配置
-因为我们刚刚修改了环境变量和数据库绑定，需要让 Cloudflare 重新读取一次：
-1. 点击项目控制台顶部的 **Deployments (部署)** 选项卡。
-2. 找到您最新的那次部署，点击右侧的 **三个点 (...)** -> 选择 **Retry deployment (重新尝试部署)**。
-3. 部署成功后，Cloudflare 会为您生成一个公网网址（例如 `https://cf-clash2v2ray.pages.dev`）。
+由于刚才修改了环境变量与 KV 数据库绑定，我们需要让 Cloudflare 重新构建以注入这些配置。
+
+**推荐的快捷重新部署方法**（直接在您本地终端中运行以下命令，通过 Git 推送直接触发 Cloudflare 自动部署，无需在网页中寻找按钮）：
+```bash
+git commit --allow-empty -m "chore: trigger deployment"
+git push
+```
+*(当然，您也可以在 Cloudflare Pages 对应项目的 **Deployments (部署)** 选项卡中，找到最新的那次部署，点击右侧的 **三个点 (...)** -> 选择 **Retry deployment (重新尝试部署)**。)*
+
+部署成功后，Cloudflare 会为您生成一个公网网址（例如 `https://cf-clash2v2ray.pages.dev`）。
 
 ### 第六步：在您的专属页面中使用
 1. 打开您的公网 Pages 网址。
