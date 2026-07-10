@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Copy, Download, CheckCircle, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import { Copy, Download, CheckCircle, Info, ChevronDown, ChevronUp, QrCode } from 'lucide-react';
 import { ConversionResult } from '../lib/convert';
+import QRCodeModal from './QRCodeModal';
 
 interface ResultCardProps {
   result: ConversionResult;
@@ -9,6 +10,7 @@ interface ResultCardProps {
 export default function ResultCard({ result }: ResultCardProps) {
   const [copied, setCopied] = useState(false);
   const [showNodeList, setShowNodeList] = useState(false);
+  const [qrNode, setQrNode] = useState<{ name: string; uri: string } | null>(null);
 
   const handleCopy = async () => {
     const text = result.subscriptionText;
@@ -46,6 +48,10 @@ export default function ResultCard({ result }: ResultCardProps) {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
+  };
+
+  const handleShowQR = (name: string, uri: string) => {
+    setQrNode({ name, uri });
   };
 
   const successCount = result.nodes.length;
@@ -149,9 +155,18 @@ export default function ResultCard({ result }: ResultCardProps) {
                   <span className="font-semibold text-claude-text-dark break-all">{node.name}</span>
                   {node.warning && <span className="text-[10px] text-amber-600 font-medium">{node.warning}</span>}
                 </div>
-                <span className="shrink-0 uppercase px-2 py-0.5 rounded bg-slate-100 text-[10px] text-slate-700 font-semibold tracking-wide border border-slate-200">
-                  {node.type}
-                </span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => handleShowQR(node.name, node.uri)}
+                    className="p-1.5 rounded-lg border border-claude-border hover:bg-claude-bg text-claude-text-muted hover:text-claude-terracotta transition-colors flex items-center justify-center"
+                    title="显示二维码"
+                  >
+                    <QrCode className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="shrink-0 uppercase px-2 py-0.5 rounded bg-slate-100 text-[10px] text-slate-700 font-semibold tracking-wide border border-slate-200">
+                    {node.type}
+                  </span>
+                </div>
               </div>
             ))}
 
@@ -173,6 +188,16 @@ export default function ResultCard({ result }: ResultCardProps) {
           </div>
         )}
       </div>
+
+      {/* Node QR Code Modal */}
+      {qrNode && (
+        <QRCodeModal
+          isOpen={!!qrNode}
+          onClose={() => setQrNode(null)}
+          nodeName={qrNode.name}
+          nodeUri={qrNode.uri}
+        />
+      )}
     </div>
   );
 }

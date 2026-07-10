@@ -2,6 +2,7 @@ import { parseSS } from './parsers/ss';
 import { parseVMess } from './parsers/vmess';
 import { parseVLESS } from './parsers/vless';
 import { parseTrojan } from './parsers/trojan';
+import { parseHttp } from './parsers/http';
 import { parseClashYaml, safeBase64Encode } from './yaml';
 
 export interface SkippedNode {
@@ -138,6 +139,13 @@ export function convertClashToV2Ray(rawText: string): ConversionResult {
         case 'hy2':
           uri = parseHysteria2(proxy);
           warning = '仅供参考,V2Ray 核心本身不原生支持 Hysteria 2(取决于客户端是否带自定义核心/插件)';
+          break;
+        case 'http':
+          uri = parseHttp(proxy, 'http');
+          break;
+        case 'socks':
+        case 'socks5':
+          uri = parseHttp(proxy, 'socks');
           break;
         default:
           skipped.push({
