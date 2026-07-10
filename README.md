@@ -37,19 +37,62 @@
 - [x] **代理防白嫖设计**：后端抓取端点强制校验 `X-Fetch-Proxy-Token`，该密钥通过前端的“设置”弹窗存入本地 `localStorage`，不在代码仓库与前端编译包中留存，安全防爬。
 - [x] **容错与大文件处理**：解析逻辑包裹在 `try-catch` 中并配合 `setTimeout`，支持在解析大文件（如包含数百个节点及海量分流规则的机场订阅）时完美显示 loading 状态，不会造成浏览器卡死。
 
----
+## 🚀 新手向部署与配置教程 (Cloudflare Pages + KV)
 
-## 🚀 快速部署 (一键部署至 Cloudflare Pages)
+本教程适合没有任何 Cloudflare Pages 部署经验的新手。请跟随以下步骤，一步一步完成您的私有订阅转换服务的搭建。
 
-1. 点击上方 **Deploy to Cloudflare Pages** 按钮（或手动进入 [Cloudflare Dashboard](https://dash.cloudflare.com) 并连接您的 GitHub 仓库）。
-2. 在 Cloudflare Pages 创建项目，设置以下构建配置：
-   - **构建命令 (`Build command`)**：`npm run build` 或 `pnpm run build`
-   - **输出目录 (`Build output directory`)**：`dist`
-3. **关键安全配置：**
-   - 进入项目根目录的 **Settings** -> **Environment variables**（环境变量）。
-   - 添加一个环境变量：`FETCH_PROXY_TOKEN`，其值设定为一个您自己知道的随机字符串（例如：`MySecretToken_123456`）。
-4. 保存并重新触发部署。
-5. 部署完成后，在前端页面的右上角点击 **“配置代理”** 按钮，输入您刚才设置的 `FETCH_PROXY_TOKEN`。这样您的前端才能正常调用 Pages Function API 获取订阅内容。
+### 第一步：关联 GitHub 并创建 Pages 项目
+1. 登录您的 [Cloudflare 控制面板](https://dash.cloudflare.com)。
+2. 在左侧菜单栏中点击 **Workers & Pages (Workers 和 Pages)**。
+3. 点击页面中间的 **Create application (创建应用程序)**，然后选择 **Pages (网页)** 选项卡。
+4. 点击 **Connect to Git (连接到 Git)**，选择您的 GitHub 账号，并找到您的 `cf-clash2v2ray` 仓库。
+5. 点击 **Begin setup (开始设置)** 进入构建配置页面。
+
+### 第二步：设置构建配置
+在配置页面中，按照以下项进行填写：
+- **Project name (项目名称)**: 默认即可（通常为 `cf-clash2v2ray`）
+- **Production branch (生产分支)**: `main`
+- **Framework preset (框架预设)**: 选择 **`Vite`**
+- **Build command (构建命令)**: `pnpm run build` 或 `npm run build`
+- **Build output directory (输出目录)**: `dist`
+填写完成后，点击底部的 **Save and Deploy (保存并部署)**。此时 Cloudflare 会开始首次编译，您可以先进行下面的数据库配置。
+
+### 第三步：创建并绑定 KV 数据库 (用于加密并生成订阅链接)
+为了能生成“一键扫码导入”的订阅链接且不暴露您的隐私凭证，我们需要配置一个轻量级的 KV 键值数据库：
+
+1. **创建 KV 空间**：
+   - 另开一个浏览器标签页，进入 Cloudflare 首页，点击左侧菜单栏的 **Workers & Pages (Workers 和 Pages)** -> 选择 **KV**。
+   - 点击右侧的 **Create namespace (创建命名空间)**。
+   - 命名空间名称输入：`cf-clash2v2ray-kv`，点击 **Add (添加)**。
+2. **在项目中绑定 KV**：
+   - 回到您的 Pages 项目控制台（点击左侧 **Workers & Pages** -> 选择刚才创建的 `cf-clash2v2ray` 项目）。
+   - 点击上方菜单栏的 **Settings (设置)** -> 在左侧子菜单中选择 **Functions (函数)**。
+   - 页面向下滑动，找到 **KV namespace bindings (KV 命名空间绑定)** 小节。
+   - 在 **Production (生产环境)** 和 **Preview (预览环境)** 中，分别点击 **Add binding (添加绑定)**：
+     - **Variable name (变量名称)**: 必须填大写的 **`KV`** (必须完全一致)
+     - **KV namespace (KV 命名空间)**: 选择您刚刚创建的 `cf-clash2v2ray-kv`
+     - 点击 **Save (保存)**。
+
+### 第四步：配置代理防白嫖密钥 (Environment variables)
+为了防止您的中转服务器被别人盗刷，我们需要配置一个访问密码：
+
+1. 同样在 Pages 项目的 **Settings (设置)** 页面，点击左侧子菜单的 **Environment variables (环境变量)**。
+2. 在 **Production (生产环境)** 和 **Preview (预览环境)** 部分中，分别点击 **Add variable (添加变量)**：
+   - **Variable name (变量名)**: 输入 **`FETCH_PROXY_TOKEN`**
+   - **Value (值)**: 输入一个您自己定义的专属随机字符串（比如 `my_private_key_999`）。请记住这个值。
+3. 点击 **Save (保存)**。
+
+### 第五步：重新部署以激活配置
+因为我们刚刚修改了环境变量和数据库绑定，需要让 Cloudflare 重新读取一次：
+1. 点击项目控制台顶部的 **Deployments (部署)** 选项卡。
+2. 找到您最新的那次部署，点击右侧的 **三个点 (...)** -> 选择 **Retry deployment (重新尝试部署)**。
+3. 部署成功后，Cloudflare 会为您生成一个公网网址（例如 `https://cf-clash2v2ray.pages.dev`）。
+
+### 第六步：在您的专属页面中使用
+1. 打开您的公网 Pages 网址。
+2. 点击页面右上角的 **“配置代理”** 按钮（齿轮或设置图标）。
+3. 填入您在**第四步**中设置的 `FETCH_PROXY_TOKEN` 密钥值，点击保存。
+4. 现在，您可以输入您的原始 Clash 链接并点击转换，程序会自动生成专属于您的超短、高安全性、支持自动同步的订阅二维码及订阅链接！
 
 ---
 
