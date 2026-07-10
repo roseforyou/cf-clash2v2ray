@@ -1,8 +1,13 @@
 # 🍁 Clash → V2Ray 订阅转换工具
 
-[![Deploy to Cloudflare Pages](https://deploy.workers.cloudflare.com/button)](https://dash.cloudflare.com/?to=/:account/pages/new)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](#)
+
+---
+
+### 🚀 一键部署
+
+[![Deploy to Cloudflare Pages](https://deploy.workers.cloudflare.com/button)](https://dash.cloudflare.com/?to=/:account/pages/new)
 
 一个纯前端解析、支持多协议、高颜值的 **Clash (Mihomo) 订阅转 V2Ray 订阅链接** 工具。项目设计灵感来源于 **Claude Chat** 的极简学术风格，并且全面适配了 PC 端与移动端。
 
