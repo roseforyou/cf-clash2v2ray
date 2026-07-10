@@ -6,18 +6,27 @@ import QRCodeModal from './QRCodeModal';
 interface ResultCardProps {
   result: ConversionResult;
   clashUrl?: string;
+  subId?: string;
 }
 
-export default function ResultCard({ result, clashUrl }: ResultCardProps) {
+export default function ResultCard({ result, clashUrl, subId }: ResultCardProps) {
   const [copied, setCopied] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const [showNodeList, setShowNodeList] = useState(false);
   const [qrNode, setQrNode] = useState<{ name: string; uri: string } | null>(null);
 
   // Retrieve token and construct dynamic subscription URL
   const token = localStorage.getItem('FETCH_PROXY_TOKEN') || '';
-  const subUrl = clashUrl
-    ? `${window.location.origin}/api/sub?token=${encodeURIComponent(token)}&url=${encodeURIComponent(clashUrl)}`
-    : result.subscriptionText; // Fallback to base64 text for paste mode
+  
+  // Decide which URL/text to use for QR code and copy link
+  let subUrl = result.subscriptionText; // default to base64 text
+  if (subId) {
+    // If KV is bound, use the short secure URL (acts as its own token)
+    subUrl = `${window.location.origin}/api/sub?id=${subId}`;
+  } else if (clashUrl) {
+    // If KV is not bound, fallback to query parameters url + token
+    subUrl = `${window.location.origin}/api/sub?token=${encodeURIComponent(token)}&url=${encodeURIComponent(clashUrl)}`;
+  }
 
   const handleCopy = async () => {
     const text = result.subscriptionText;
@@ -44,6 +53,27 @@ export default function ResultCard({ result, clashUrl }: ResultCardProps) {
       setTimeout(() => setCopied(false), 1500);
     } catch (err) {
       alert('复制失败，请手动选择文本复制。');
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(subUrl);
+      } else {
+        const textArea = document.createElement('textarea');
+        textArea.value = subUrl;
+        textArea.style.position = 'fixed';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      }
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 1500);
+    } catch (err) {
+      alert('链接复制失败');
     }
   };
 
@@ -83,6 +113,36 @@ export default function ResultCard({ result, clashUrl }: ResultCardProps) {
           )}
         </div>
       </div>
+
+      {/* Dynamic Subscription URL Box (only when in URL mode) */}
+      {(clashUrl || subId) && (
+        <div className="space-y-2 p-4 bg-emerald-50/20 border border-emerald-100/40 rounded-2xl animate-slide-up">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-emerald-800 uppercase tracking-wider flex items-center gap-1">
+              {subId ? '✨ 订阅链接 (已加密托管在 KV 数据库中)' : '⚡ 动态订阅链接 (参数传递)'}
+            </span>
+            <button
+              onClick={handleCopyLink}
+              className={`px-2.5 py-1.5 rounded-lg border text-[11px] font-medium flex items-center gap-1.5 transition-all shadow-sm ${
+                linkCopied
+                  ? 'bg-emerald-600 border-emerald-600 text-white'
+                  : 'bg-white border-claude-border text-claude-text-muted hover:text-claude-text-dark hover:bg-claude-bg'
+              }`}
+            >
+              {linkCopied ? '已复制 ✓' : '复制订阅链接'}
+            </button>
+          </div>
+          <div className="text-xs font-mono break-all bg-white border border-claude-border px-3 py-2.5 rounded-xl text-claude-text-dark select-all">
+            {subUrl}
+          </div>
+          <p className="text-[10px] text-claude-text-muted leading-relaxed">
+            {subId 
+              ? '此链接生成在您的专属 Cloudflare KV 键值库中，它隐藏并保护了您原始订阅的 Token 信息。您可将此链接直接填入客户端的订阅配置中，即可享受自动定期同步服务。'
+              : '此链接将原始订阅以参数方式带在 URL 中。您可以直接复制该链接放入您的客户端，以供其定期自动拉取与在云端实时转换。'
+            }
+          </p>
+        </div>
+      )}
 
       {/* Output base64 text box */}
       <div className="space-y-2">

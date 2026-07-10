@@ -1,5 +1,6 @@
 interface Env {
   FETCH_PROXY_TOKEN?: string;
+  KV?: KVNamespace;
 }
 
 export const onRequest: PagesFunction<Env> = async (context) => {
@@ -105,8 +106,6 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const remoteResponse = await fetch(targetUrl.toString(), {
       method: 'GET',
       headers: {
-        // Crucial: Use 'clash' User-Agent because some subscription conversion services
-        // require a recognized User-Agent to output raw Clash configurations.
         'User-Agent': 'clash',
         'Accept': '*/*',
       },
@@ -129,13 +128,26 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
     const text = await remoteResponse.text();
 
-    return new Response(text, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Access-Control-Allow-Origin': '*',
-      },
-    });
+    // If Cloudflare KV is bound, generate a unique ID and store the mapping
+    let id: string | undefined;
+    if (env.KV) {
+      id = crypto.randomUUID();
+      await env.KV.put(id, targetUrl.toString());
+    }
+
+    return new Response(
+      JSON.stringify({
+        text,
+        id,
+      }),
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Access-Control-Allow-Origin': '*',
+        },
+      }
+    );
   } catch (err: any) {
     return new Response(
       JSON.stringify({ error: `代理抓取失败：${err.message}` }),

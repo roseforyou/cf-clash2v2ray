@@ -11,6 +11,7 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [globalError, setGlobalError] = useState('');
   const [clashUrl, setClashUrl] = useState('');
+  const [subId, setSubId] = useState('');
 
   const handleConvertUrl = async (url: string) => {
     setIsLoading(true);
@@ -49,7 +50,9 @@ export default function App() {
         throw new Error(errJson.error || `请求代理失败，状态码: ${response.status}`);
       }
 
-      const text = await response.text();
+      const data = await response.json() as { text: string; id?: string };
+      const text = data.text;
+      const subIdVal = data.id || '';
       
       // 3. Process conversion on the text
       // Wrap in setTimeout to let UI thread render spinner
@@ -59,6 +62,7 @@ export default function App() {
             const convResult = convertClashToV2Ray(text);
             setResult(convResult);
             setClashUrl(url);
+            setSubId(subIdVal);
             resolve();
           } catch (err: any) {
             reject(err);
@@ -84,6 +88,7 @@ export default function App() {
         const convResult = convertClashToV2Ray(text);
         setResult(convResult);
         setClashUrl('');
+        setSubId('');
       } catch (err: any) {
         setGlobalError(err.message || 'YAML 解析或转换失败，请检查文本格式。');
       } finally {
@@ -141,7 +146,7 @@ export default function App() {
         )}
 
         {/* Result Card */}
-        {result && <ResultCard result={result} clashUrl={clashUrl} />}
+        {result && <ResultCard result={result} clashUrl={clashUrl} subId={subId} />}
       </main>
 
       {/* Footer */}

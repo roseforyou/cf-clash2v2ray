@@ -9,3 +9,7 @@ build_command = "npm run build"
 [vars]
 # For local testing. In production, configure FETCH_PROXY_TOKEN in the Cloudflare Pages dashboard environment variables.
 FETCH_PROXY_TOKEN = "local_development_token_change_me_in_dashboard"
+
+[[kv_namespaces]]
+binding = "KV"
+id = "cf_clash2v2ray_kv"
