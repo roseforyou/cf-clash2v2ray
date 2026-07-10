@@ -1,0 +1,11 @@
+name = "clash-to-v2ray-converter"
+compatibility_date = "2026-07-10"
+compatibility_flags = [ "nodejs_compat" ]
+
+[pages_build_config]
+directory = "dist"
+build_command = "npm run build"
+
+[vars]
+# For local testing. In production, configure FETCH_PROXY_TOKEN in the Cloudflare Pages dashboard environment variables.
+FETCH_PROXY_TOKEN = "local_development_token_change_me_in_dashboard"
