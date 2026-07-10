@@ -88,7 +88,7 @@ npx wrangler pages dev dist
 ## 📂 项目结构
 
 ```
-clash2v2ray/
+cf-clash2v2ray/
 ├── functions/
 │   └── api/
 │       └── fetch.ts          # Pages Function 后端代理抓取 API (防 CORS)

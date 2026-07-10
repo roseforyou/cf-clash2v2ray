@@ -1,4 +1,4 @@
-name = "clash-to-v2ray-converter"
+name = "cf-clash2v2ray"
 compatibility_date = "2026-07-10"
 compatibility_flags = [ "nodejs_compat" ]
 
