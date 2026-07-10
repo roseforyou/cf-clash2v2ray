@@ -11,15 +11,16 @@ export interface HistoryItem {
 
 interface HistoryPanelProps {
   items: HistoryItem[];
+  token: string;
   onClearItem: (id: string) => void;
   onClearAll: () => void;
 }
 
-export default function HistoryPanel({ items, onClearItem, onClearAll }: HistoryPanelProps) {
+export default function HistoryPanel({ items, token, onClearItem, onClearAll }: HistoryPanelProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [qrItem, setQrItem] = useState<{ name: string; uri: string } | null>(null);
 
-  if (items.length === 0) return null;
+  if (!token || items.length === 0) return null;
 
   const handleCopyLink = async (item: HistoryItem) => {
     const subUrl = `${window.location.origin}/api/sub?id=${item.id}`;

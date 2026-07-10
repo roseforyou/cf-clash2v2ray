@@ -14,6 +14,7 @@ export default function App() {
   const [clashUrl, setClashUrl] = useState('');
   const [subId, setSubId] = useState('');
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [token, setToken] = useState(localStorage.getItem('FETCH_PROXY_TOKEN') || '');
 
   useEffect(() => {
     const saved = localStorage.getItem('CF_CLASH2V2RAY_HISTORY');
@@ -142,8 +143,13 @@ export default function App() {
 
   return (
     <div className="w-full max-w-[720px] mx-auto px-4 py-6 sm:py-10 flex flex-col min-h-screen">
-      {/* Settings Modal */}
-      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+      <SettingsModal 
+        isOpen={isSettingsOpen} 
+        onClose={() => {
+          setIsSettingsOpen(false);
+          setToken(localStorage.getItem('FETCH_PROXY_TOKEN') || '');
+        }} 
+      />
 
       {/* Header section */}
       <header className="flex flex-col items-center text-center mb-6 space-y-1.5">
@@ -194,6 +200,7 @@ export default function App() {
         {/* History Panel */}
         <HistoryPanel
           items={history}
+          token={token}
           onClearItem={handleClearHistoryItem}
           onClearAll={handleClearAllHistory}
         />
