@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Compass, AlertCircle, RefreshCw } from 'lucide-react';
 import InputPanel from './components/InputPanel';
 import ResultCard from './components/ResultCard';
 import SettingsModal from './components/SettingsModal';
+import HistoryPanel, { HistoryItem } from './components/HistoryPanel';
 import { convertClashToV2Ray, ConversionResult } from './lib/convert';
 
 export default function App() {
@@ -12,6 +13,33 @@ export default function App() {
   const [globalError, setGlobalError] = useState('');
   const [clashUrl, setClashUrl] = useState('');
   const [subId, setSubId] = useState('');
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('CF_CLASH2V2RAY_HISTORY');
+    if (saved) {
+      try {
+        setHistory(JSON.parse(saved));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, []);
+
+  const handleClearHistoryItem = (id: string) => {
+    setHistory(prev => {
+      const updated = prev.filter(item => item.id !== id);
+      localStorage.setItem('CF_CLASH2V2RAY_HISTORY', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const handleClearAllHistory = () => {
+    if (confirm('确认要清空所有转换历史记录吗？')) {
+      setHistory([]);
+      localStorage.removeItem('CF_CLASH2V2RAY_HISTORY');
+    }
+  };
 
   const handleConvertUrl = async (url: string) => {
     setIsLoading(true);
@@ -63,6 +91,21 @@ export default function App() {
             setResult(convResult);
             setClashUrl(url);
             setSubId(subIdVal);
+            
+            if (subIdVal) {
+              const newItem: HistoryItem = {
+                id: subIdVal,
+                clashUrl: url,
+                date: new Date().toLocaleString('zh-CN', { hour12: false }),
+                nodeCount: convResult.nodes.length
+              };
+              setHistory(prev => {
+                const filtered = prev.filter(item => item.clashUrl !== url);
+                const updated = [newItem, ...filtered].slice(0, 10);
+                localStorage.setItem('CF_CLASH2V2RAY_HISTORY', JSON.stringify(updated));
+                return updated;
+              });
+            }
             resolve();
           } catch (err: any) {
             reject(err);
@@ -147,6 +190,13 @@ export default function App() {
 
         {/* Result Card */}
         {result && <ResultCard result={result} clashUrl={clashUrl} subId={subId} />}
+
+        {/* History Panel */}
+        <HistoryPanel
+          items={history}
+          onClearItem={handleClearHistoryItem}
+          onClearAll={handleClearAllHistory}
+        />
       </main>
 
       {/* Footer */}
