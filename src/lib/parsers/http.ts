@@ -20,5 +20,10 @@ export function parseHttp(proxy: any, scheme: 'http' | 'socks' = 'http'): string
     authPart = `${base64Credentials}@`;
   }
 
-  return `${scheme}://${authPart}${server}:${port}#${encodeURIComponent(name)}`;
+  let finalScheme: string = scheme;
+  if (scheme === 'http' && !!proxy.tls) {
+    finalScheme = 'https';
+  }
+
+  return `${finalScheme}://${authPart}${server}:${port}#${encodeURIComponent(name)}`;
 }
