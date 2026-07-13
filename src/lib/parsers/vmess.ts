@@ -23,11 +23,11 @@ export function parseVMess(proxy: any): string {
 
   if (net === 'ws') {
     const wsOpts = proxy['ws-opts'] || {};
-    path = wsOpts.path || '';
-    if (wsOpts.headers && wsOpts.headers.Host) {
-      host = wsOpts.headers.Host;
-    } else if (wsOpts.headers && wsOpts.headers.host) {
-      host = wsOpts.headers.host;
+    path = wsOpts.path || proxy['ws-path'] || '';
+    if (wsOpts.headers && (wsOpts.headers.Host || wsOpts.headers.host)) {
+      host = wsOpts.headers.Host || wsOpts.headers.host || '';
+    } else if (proxy['ws-headers'] && (proxy['ws-headers'].Host || proxy['ws-headers'].host)) {
+      host = proxy['ws-headers'].Host || proxy['ws-headers'].host || '';
     }
   } else if (net === 'grpc') {
     const grpcOpts = proxy['grpc-opts'] || {};

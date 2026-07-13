@@ -13,9 +13,9 @@ export function parseSS(proxy: any): string {
     throw new Error('Missing server or port for Shadowsocks');
   }
 
-  // Safe base64 encoding in browser / JavaScript environment
-  const credentials = `${cipher}:${password}`;
-  const base64Credentials = btoa(unescape(encodeURIComponent(credentials)));
+  // Legacy format: ss://base64(cipher:password@server:port)#name
+  const ssConfig = `${cipher}:${password}@${server}:${port}`;
+  const base64Config = btoa(unescape(encodeURIComponent(ssConfig)));
 
-  return `ss://${base64Credentials}@${server}:${port}#${encodeURIComponent(name)}`;
+  return `ss://${base64Config}#${encodeURIComponent(name)}`;
 }

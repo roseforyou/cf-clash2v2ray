@@ -65,10 +65,24 @@ export function parseSSR(proxy: any): string {
  */
 export function parseHysteria2(proxy: any): string {
   const server = proxy.server || '';
-  const port = proxy.port || '';
-  const password = proxy.auth || proxy.password || '';
+  const password = proxy.password || proxy.auth || '';
   const name = proxy.name || '';
   
+  // Resolve port supporting port ranges/lists and the `ports` parameter (common in Hysteria2)
+  let port = '';
+  if (proxy.port) {
+    port = String(proxy.port);
+  } else if (proxy.ports) {
+    const portsStr = String(proxy.ports);
+    if (portsStr.includes('-')) {
+      port = portsStr.split('-')[0];
+    } else if (portsStr.includes(',')) {
+      port = portsStr.split(',')[0];
+    } else {
+      port = portsStr;
+    }
+  }
+
   if (!server || !port) {
     throw new Error('Missing server or port for Hysteria2');
   }
@@ -80,6 +94,16 @@ export function parseHysteria2(proxy: any): string {
   }
   if (proxy.insecure) {
     queryParams.set('insecure', '1');
+  }
+
+  // Support up/down bandwidth configurations
+  const up = proxy.up || proxy.up_mbps || '';
+  if (up) {
+    queryParams.set('up', String(up).replace(/\s*[M|m]bps/g, ''));
+  }
+  const down = proxy.down || proxy.down_mbps || '';
+  if (down) {
+    queryParams.set('down', String(down).replace(/\s*[M|m]bps/g, ''));
   }
 
   const queryStr = queryParams.toString();
